@@ -74,6 +74,32 @@ async def story(ctx, *, prompt):
     except Exception as e:
         await ctx.send(f"An error occurred: {e}")
 
+bot.run(os.getenv('DISCORD_BOT_TOKEN'))
+
+"""
+Install the Google AI Python SDK
+
+$ pip install google-generativeai
+
+See the getting started guide for more information:
+https://ai.google.dev/gemini-api/docs/get-started/python
+"""
+
+import os
+
+import google.generativeai as genai
+
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+
+# Create the model
+# See https://ai.google.dev/api/python/google/generativeai/GenerativeModel
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 8192,
+  "response_mime_type": "text/plain",
+}
 safety_settings = [
   {
     "category": "HARM_CATEGORY_HARASSMENT",
@@ -93,4 +119,24 @@ safety_settings = [
   },
 ]
 
-bot.run(os.getenv('DISCORD_BOT_TOKEN'))
+model = genai.GenerativeModel(
+  model_name="gemini-1.5-pro",
+  safety_settings=safety_settings,
+  generation_config=generation_config,
+  system_instruction="あなたは女子校での生活体験を提供するbotです", )
+
+chat_session = model.start_chat(
+  history=[
+    {
+      "role": "user",
+      "parts": [
+        "はじめる",
+      ],
+    },
+  ]
+)
+
+response = chat_session.send_message("INSERT_INPUT_HERE")
+
+print(response.text)
+print(chat_session.history)
