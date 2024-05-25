@@ -1,8 +1,13 @@
 import discord
 import os
+import asyncio  # asyncioのインポートを追加
 
 import google.generativeai as genai
-genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
+from dotenv import load_dotenv
+
+load_dotenv()
+
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
 chat = model.start_chat(history=[])
 
@@ -19,7 +24,6 @@ def split_text(text, chunk_size=1500):
 async def on_ready():
   print(f'We have logged in as {discord.user}')
 
-
 @discord.event
 async def on_message(message):
   if message.author == discord.user:
@@ -34,5 +38,6 @@ async def on_message(message):
   splitted_text = split_text(answer.text)
   for chunk in splitted_text:
     await message.channel.send(chunk)
+    await asyncio.sleep(1)  # 1秒待機
 
 discord.run(os.environ['DISCORD_BOT_TOKEN'])
